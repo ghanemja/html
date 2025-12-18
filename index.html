@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>From Pixels to Parameters: Vision-Language Models for Automated CAD Design and Optimization</title>
+  <meta name="description" content="Automating parametric CAD refinement using multimodal vision-language models to democratize engineering design." />
+  <style>
+    :root {
+      --bg: #0b0c10;
+      --bg-soft: #11131a;
+      --text: #e6e6e6;
+      --muted: #9aa4ad;
+      --brand: #69d2ff;
+      --card: #0f1117;
+      --border: #2a2f3a;
+      --accent: #7ef29a;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #ffffff;
+        --bg-soft: #f6f7f9;
+        --text: #16181d;
+        --muted: #4a5568;
+        --brand: #0ea5e9;
+        --card: #ffffff;
+        --border: #e5e7eb;
+        --accent: #059669;
+      }
+    }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      font-size: 18px;
+    }
+    .container { max-width: 1400px; margin: 0 auto; padding: 2rem 1.5rem 5rem; }
+    header { padding: 2rem 0 1.25rem; }
+    h1 { font-size: clamp(1.8rem, 2.8vw, 2.6rem); line-height: 1.15; margin: 0.2rem 0 0.75rem; }
+    h2 { font-size: clamp(1.3rem, 2.1vw, 1.6rem); margin-top: 2.2rem; border-top: 1px solid var(--border); padding-top: 1.1rem; }
+    h3 { font-size: 1.05rem; margin-top: 1.4rem; color: var(--brand); }
+    p { margin: 0.7rem 0; }
+    .muted { color: var(--muted); }
+    .tag { display: inline-block; padding: 0.2rem 0.55rem; border: 1px solid var(--border); border-radius: 999px; font-size: 0.8rem; color: var(--muted); }
+    .hero {
+      background: linear-gradient(180deg, rgba(105,210,255,.06), transparent 60%);
+      border: 1px solid var(--border);
+      border-radius: 16px; padding: 1.25rem 1rem;
+    }
+    .toc { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; }
+    .toc a { color: var(--muted); text-decoration: none; }
+    .toc a:hover { color: var(--brand); }
+    code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Cmyier New", monospace; }
+    pre { background: var(--card); border: 1px solid var(--border); padding: 1rem; border-radius: 10px; overflow: auto; }
+    .callout { border-left: 3px solid var(--brand); background: var(--bg-soft); padding: 0.9rem 1rem; border-radius: 8px; }
+    .contrib { display: grid; gap: .8rem; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+    .chip { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 12px; padding: .75rem .9rem; }
+    figure { margin: 1.4rem 0; }
+    figure > img { width: 50%; height: auto; border-radius: 12px; border: 1px dashed var(--border); background: var(--bg-soft); aspect-ratio: 16/9; object-fit: contain; margin: 0 auto; display: block; }
+    figcaption { font-size: .9rem; color: var(--muted); margin-top: .45rem; }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: .98rem; }
+    th, td { border: 1px solid var(--border); padding: .6rem .5rem; text-align: center; }
+    th { background: var(--bg-soft); }
+    .small { font-size: .92rem; }
+    footer { margin-top: 3rem; color: var(--muted); font-size: .9rem; }
+    .anchor { color: inherit; text-decoration: none; }
+    .anchor:hover { color: var(--brand); }
+    .kpi { display:grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: .75rem; margin: .8rem 0 0; }
+    .kpi .chip { text-align:center; }
+  </style>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <span class="tag">Advances in Computer Vision Final Project</span>
+      <h1>From Pixels to Parameters: Vision-Language Models for Automated CAD Design and Optimization</h1>
+      <p class="muted small">Author: Janelle Ghanem</p>
+      <div class="hero">
+        <p>Computer-Aided Design (CAD) has become a foundational tool across a vast range of engineering and industrial domains, including manufacturing, product development, and aerospace design. CAD models serve not only as visual representations but as the primary medium through which physical objects are conceptualized, analyzed, and fabricated. They define not only geometry, but also the parametric and relational structure through which  (specifically parameter definitions, constraints, and relationships that characterize the model) is expressed and modified. Despite their central role, the creation of accurate, editable CAD models remains an expert-driven process requiring extensive manual iteration and domain-specific judgment. For various reasons, CAD modeling and optimization is a process that can take weeks to months for a high-fidelity shape, and is a process that must be done by subject matter experts and highly specialized engineers.</p> 
+        <p>This work investigates whether vision-language models (VLMs) can bridge the gap between visual perception and parametric CAD modeling by proposing executable geometric modifications grounded in reference imagery. I introduce a hybrid system that combines fine-tuned VLM reasoning with rule-based parameter extraction and syntax normalization to generate valid CadQuery code edits. Given a reference image \(I_{\mathrm{ref}}\) and current CAD state \(S\), the system produces parameter updates \(\Delta\theta\) that minimize visual discrepancy between the current CAD model and the geometry of the object in the reference image while preserving constraints. This approach enables rapid optimization of CAD models to objects in 2D imagery, guided by human natural language inputs. Furthermore, this workflow automates low-level parameter tuning and CAD regeneration, and expands design exploration space through lightweight iteration. The significant impact of this work is that it enables non-experts to contribute to CAD refinement via natural language, broadening the accessibility to developing and optimizing CAD models.</p>
+      </div>
+    </header>
+
+    <nav class="toc">
+      Contents
+      <ol class="small">
+        <li><a href="#intro" class="anchor">1. Introduction & Motivation</a></li>
+        <li><a href="#rq" class="anchor">2. Research Question</a></li>
+        <li><a href="#related" class="anchor">3. Background & Related Work</a></li>
+        <li><a href="#formulation" class="anchor">4. Problem Formulation</a></li>
+        <li><a href="#workflow" class="anchor">5. Workflow Comparison: Traditional vs. VLM‑Assisted CAD</a></li>
+        <li><a href="#methods" class="anchor">6. Initial VLM Assessment</a></li>
+        <li><a href="#dataset" class="anchor">7. Dataset Design & Creation</a></li>
+        <li><a href="#vlm-selection" class="anchor">8. VLM Selection & Fine‑Tuning</a></li>
+        <li><a href="#system" class="anchor">9. System Architecture & Implementation</a></li>
+        <li><a href="#experiments" class="anchor">10. Experiments & Results</a></li>
+        <li><a href="#discussion" class="anchor">11. Discussion</a></li>
+        <li><a href="#conclusion" class="anchor">12. Conclusion</a></li>
+        <li><a href="#refs" class="anchor">References</a></li>
+      </ol>
+    </nav>
+
+    <section id="intro">
+      <h2>1. Introduction & Motivation</h2>
+      <p>Traditional CAD modeling workflows are inherently laborious and highly dependent on expertise and required fidelity. For practical applications, engineers must iteratively define geometric primitives, apply constraints, and manually adjust parameter values until the desired outcome is achieved. Even when modeling the same object, two engineers may arrive at geometrically equivalent designs through entirely different parametric structures or construction sequences. This reveals the high degree of subjectivity embedded in current design practices and dependence on human intuition and experience limits scalability, reproducibility, and accessibility. This subjectivity reflects both the flexibility and inefficiency of current CAD modeling practices, where the final model often depends as much on personal style and experience as on objective design intent. Developing parameterized CAD models introduces additional complexity, as designers must explicitly define the parameters, constraints, and relationships that govern geometric behavior. Determining appropriate parameter ranges typically requires extensive manual tuning and iterative testing.</p>  
+      <p>As digital fabrication technologies, such as 3D printing and rapid prototyping, have become increasingly accessible and automated, the disparity between the ease of production and the difficulty of design has become more apparent. While anyone can now fabricate a part with minimal technical background, the creation of high-quality parametric CAD models remains confined to specialists. To close this gap, it is imperative to make CAD modeling faster, more intuitive, and more accessible without sacrificing precision or design intent. Automating or streamlining this process would not only accelerate model creation but also democratize the design pipeline, empowering a broader range of users to generate manufacturable, modifiable CAD representations with minimal expert intervention. Closing this gap demands rethinking CAD not as a static drafting interface, but as an intelligent, collaborative system capable of interpreting operational environment and context, reasoning about structure, and autonomously proposing refinements.</p>
+      <p>Recent advances in vision-language models (VLMs) present a compelling opportunity to advance this transformation. These models can integrate visual and textual modalities, enabling a form of multimodal reasoning that unites perception and symbolic understanding. </p>
+      <p>My proposed system addresses these challenges by enabling rapid optimization between an existing CAD model, human natural language, imagery cues. This eliminates the need for manual parameter tuning and constraint definition. This reduces the time from concept to operational model from weeks to minutes. The system expands design exploration space through intelligent iteration, allowing designers to explore more design variants than traditional manual approaches. Most importantly, it enables non-experts to contribute to CAD refinement via natural communication, breaking down the technical barriers that have historically limited parametric modeling to CAD specialists.</p>
+    </section>
+
+    <section id="rq">
+      <h2>2. Research Question</h2>
+      <div class="callout">
+        <p>Can a multimodal model, conditioned on a <em>pair</em> of images (reference + current) and text, generate executable CadQuery edits that preserve constraints?</p>
+      </div>
+    </section>
+
+    <section id="related">
+      <h2>3. Background & Related Work</h2>
+      <h3>3.1 Vision‑Language Models for Spatial Reasoning</h3>
+      <p>BLIP‑2, LLaVA, GPT‑4V and successors show strong visual-language reasoning, but most focus on image-level tasks rather than leveraging that information to optimize to 3-dimensional space.</p>
+      <h3>3.2 Programmatic CAD and Procedural Design</h3>
+      <p>CadQuery and <code>cqparts</code> are python libraries that allow engineers to develop high fidelity CAD models and assemblies without relying on CAD software. Specifically, parameters, components, constraints and parameter relationships are modeled through this framework in as little as a single python script. Programmatic control enables analytic edits without mesh degradation - meaning that VLM-driven modifications to the meshes can be made without the fear of ruining the structural integrity of the mesh (i.e. disrupting watertight properties) so that it can still provide value in downstream analysis tools such as fluid dynamics code.</p>
+      <h3>3.3 Prior Work in VLM-CAD Integration</h3>
+      <p>Recent work has demonstrated various approaches to bridging vision-language models with CAD systems. Query2CAD uses an LLM to generate executable CAD macros and then self-refines with BLIP-2 feedback and optional human-in-the-loop review. They explicitly implement a generate-execute-refine loop. This implmentation neglects to leverage visual information in the generation phase (i.e. envision an engineer starting with CAD sketches,  images of a real object, etc.) Query2CAD specifically leverages visual ques only in the refinement phase. Furthermore, it regenerates macros from scratch each time, whereas this implementation focuses on preserving model integrity and producing editable variables that can be leveraged for parameterization and downstream engineering analysis tools. CADCodeVerify fixes mistakes in CAD code after generation by checking how well the rendered model matches the text prompt. CadVLM creates new CAD sketches from images with automatic constraints, and CAD-Coder converts a single image into executable CadQuery code. In contrast, our system introduces improvement of CAD models by comparing them to a target image and automatically adjusting only the necessary parameters and constraints (i.e. dimensions, components, or parameter definitions) so the model matches the input image and designer inputs. Unlike other papers, this approach avoids full code regeneration, preserves structural integrity and constraints, and enables rapid updates that non-experts can perform through simple visual feedback. The objective is to target the use case of needing high fidelity, engineering ready models that can be put into downstream computer aided simulation tools. Furthermore, the loop stabilization and iteration leverages rule-based arithmetic, syntax and constraint normalization, and can in the future leverage physics simulation tools and operational context (i.e. if this is a rover meant to traverse uneven terrain, what design considerations need to be put in place). This allows for explicit parameters and components to stay intact for downstream manufacturing and validation.</p>
+    </section>
+
+    <section id="formulation">
+      <h2>4. Problem Formulation</h2>
+      <p>Let \(\mathcal{P}=\{\theta_i\}\) be CAD parameters; and current CAD model state \(S=(\mathcal{P},\mathcal{M},\mathcal{C})\). Inputs are a reference image \(I_{\mathrm{ref}}\), current render \(I_{\mathrm{cad}}=R(S)\), and text \(T\). Objective:</p>
+      <p style="text-align:center">\[\Delta\theta^*=\arg\min_{\Delta\theta} \; \mathcal{L}_{\mathrm{vis}}(R(S+\Delta\theta), I_{\mathrm{ref}}) + \lambda\, \mathcal{L}_{\mathrm{constraint}}(S+\Delta\theta)\]</p>
+      <p>To mitigate VLM hallucination and breaking syntax errors, I route common arithmetic edits to rules \(\mathcal{R}\), and complex structural changes to a fine‑tuned VLM \(f_\theta\). A normalization layer \(\mathcal{N}\) restores imports, fixes syntax, and enforces simple constraints. This is represented as:</p>
+      <p>\[\hat{S}=\mathcal{N}\!\left(S+\Delta\theta\right)\]</p>
+    </section>
+
+    <section id="methods">
+      <h2>5. Workflow Comparison: Traditional vs. VLM‑Assisted CAD</h2>
+      <figure>
+        <img src="assets/workflow.png" alt="Workflow comparison diagram" style="width: 100%; height: auto; background: white; padding: 1rem;" />
+        <figcaption>Figure 1. Comparison of (A) traditional manual CAD optimization and (B) VLM-assisted parametric CAD workflow. The traditional process involves iterative human-driven modeling, simulation, and tuning, while the proposed system leverages a multimodal vision-language model to translate image or language input into parametric CadQuery code, enabling automated geometry generation and rapid optimization with human-in-the-loop feedback.</figcaption>
+      </figure>
+
+      <h4>Traditional Method for CAD Design and Optimization</h4>
+      <p>The conventional approach to parametric CAD design is shown above and can be characterized by extensive manual effort across multiple disconnected stages. A typical workflow begins with concept and ideations, where designers translate requirements (textual specifications, reference images, verbal descriptions, or performance requirements) into mental models of 3D geometry. This cognitive translation—from "make it look like this reference image" to "set parameter X to value Y"—is entirely human-driven and requires significant domain expertise.</p>
+      
+      <p>Next comes manual parameter specification. Designers open CAD software, create or load parametric models, and iteratively adjust numeric values through GUI sliders, dragging and manipulating components through the GUI, or input boxes. Each parameter change triggers a rebuild, requiring the designer to visually inspect the result, compare it to the target (often displayed in a separate window or printed reference), and decide what to adjust next. This trial-and-error process is slow, error-prone, and cognitively demanding: engineers must maintain a mental mapping between visual discrepancies and the relationships and constraints between the underlying parameters that control them.</p>
+      
+      <p>For complex modifications—such as matching a multi-dimensional reference or optimizing multiple coupled parameters, the traditional workflow becomes exponentially more difficult. For example, changing a wheel diameter might require adjusting spacing to avoid overlap; widening a chassis may require repositioning mount points. These constraint dependencies are rarely explicit in the UI, forcing designers to manually discover and resolve conflicts through repeated rebuild-inspect-adjust cycles. A single design iteration (from identifying a discrepancy to implementing a fix) can take minutes to hours, depending on model complexity and the designer's familiarity with the parameter space.</p>
+      
+      <p>Furthermore, traditional workflows suffer from poor reproducibility and knowledge transfer. Because parameter choices are made through implicit reasoning ("this looks about right"), the rationale behind design decisions is often lost. If another engineer inherits the project, they must re-learn the parameter space from scratch. Documentation is manual and frequently outdated. The entire process is done one parameter at a time, is driven by responding to visual inspection rather than proactive analysis, and is very inaccessible to non-CAD specialists or domain experts who understand the operational environment of the object being modeled.</p>
+      
+      <h4>Proposed Workflow for Human-Machine Teaming Based Approach</h4>
+      <p>The proposed system fundamentally restructures this workflow by introducing a vision-language model as an intermediary between the user's qualitative, visual assessment and parametric, physically constrained CAD code using the CADQuery python library. Instead of manually translating reference images into parameter changes, designers can provide the system with:</p>
+      <ul>
+        <li>The reference image containing the target state</li>
+        <li>The current state of the CAD model</li>
+        <li>A natural language instruction (i.e. "make it match the reference," "add wheels like in the image," "increase spacing by 20%")</li>
+      </ul>
+      
+      <p>The workflow leverages the VLM to qualitatively assess the reference and current states, identifies specific geometric differences (wheel count, spacing, dimensions, component presence), and maps those visual discrepancies to relevant CAD parameters. This eliminates the cognitive burden of mental parameter-to-visual reasoning. The model then generates >executable code deltas with precise, syntactically correct modifications to the CadQuery source code to directly implement the required changes. Once the changes to the script are made, they are run through multiple phases of normalization code to validate syntax, ensure constraints are not broken, and in the future can contain hooks into domain-specific checks and simulations (i.e. a simple static stability assessment for aircraft shapes).</p>
+      
+      <p>Another sticking point for CAD designers is that there are a variety of tools required to finalize the design. In this implementation, the goal is to be a one-stop shop for optimization and simulation tools for use cases of both rapid protoyping and high fidelity model optimization. Designers don't switch between inspection tools, parameter editors, and rebuild commands. The system presents: (1) the proposed code changes in a diff view on the GUI, (2) a natural language recommendation of other attributes that can be modified to better match the model to the reference image, and (3) an option to preview or apply the changes. If the result isn't perfect, the designer provides feedback ("the wheels are still too small"), and the system iterates with or without specific dimensional information, refining the parameters in a simple, shuman-in-the-loop refinement cycle.</p>
+      
+      <p>This approach offers several benefits:</p>
+      <ul>
+        <li><strong>Parallelized Modifications:</strong> The VLM can propose and iterate on multi-parameter edits simultaneously (e.g., "increase wheel diameter AND adjust spacing"), avoiding the serial one-at-a-time adjustments of manual workflows.</li>
+        <li><strong>Accessibility:</strong> Non-experts can participate in CAD refinement using natural language and reference images, democratizing parametric modeling beyond CAD specialists.</li>
+        <li><strong>Speed:</strong> Design iteration cycles collapse from months/weeks to minutes. The system immediately proposes changes upon receiving a reference image, eliminating manual parameter hunting.</li>
+        <li><strong>Explicit Rationale:</strong> The VLM's recommendations are accompanied by explanations ("increase spacing to match reference," "reduce diameter by 15mm to avoid overlap"), making design decisions transparent and reproducible. This framework allows for extension to consider operational environment in the future for enhanced constraint definition and reasoning</li>
+        <li><strong>Constraint Awareness:</strong> The system (via rule-based post-processing and learned priors) respects geometric constraints and parametric relationships, avoiding invalid configurations that manual edits might produce.</li>
+      </ul>
+      
+      <p>Figure 1 below illustrates this workflow transformation, contrasting the manual multi-stage traditional process with the streamlined VLM-assisted approach:</p>
+      
+      <figure>
+        <img src="assets/refinement_loop.png" alt="Refinement loop diagram" style="background: white; padding: 1rem;" />
+        <figcaption>Figure 1b. Detailed refinement loop showing the iterative process of VLM-assisted CAD optimization with feedback mechanisms. The cycle begins with dual-image input (reference + current state), passes through VLM reasoning to generate code proposals, executes and renders the modified geometry, then returns to the designer for validation. This closed-loop structure enables rapid convergence on target designs while maintaining human oversight at each iteration.</figcaption>
+      </figure>
+      
+      <p>This workflow transformation represents a shift from expert driven to operationally driven design. Rather than manipulating low-level numeric values, designers can express high-level goals ("match this reference," "introduce curvature to the aft"), and the system handles the translation to executable code. The VLM acts as an <em>intelligent intermediary</em> that bridges the semantic gap between visual perception and parametric representation, fundamentally changing how humans interact with parametric CAD systems.</p>
+
+      <h2>6. Initial VLM Assessment</h2>
+      <p>Initial experiments with various pretrained VLMs from the ollama registry revealed significant limitations in generating executable CAD assemblies. While these models demonstrated strong general visual reasoning capabilities, they lacked the domain-specific knowledge required for parametric CAD operations using the CADQuery API. They very consistently contained syntax errors despite very specific prompting. The example below shows an early attempt where the LLAVA pre‑trained model was asked to add wheels to a rover base:</p>
+      
+      <figure>
+        <img src="assets/reference_image.png" alt="Reference image showing 4-wheel rover configuration" />
+        <figcaption>Fig 3a. <em>Reference Image:</em> This image serves as the target configuration that the VLM system aims to achieve. It shows a 4-wheel rover setup that users can reference when making modifications to their CAD models. The system uses this reference to understand the desired end state when processing natural language instructions.</figcaption>
+      </figure>
+
+      <figure>
+        <img src="assets/original_wheel_add.png" alt="Pre-fine-tuning VLM attempt to add wheels" style="width: 50%; height: auto;" />
+        <figcaption>Figure 2. <em>Pre-Fine-Tuning Limitations:</em> Initial attempt by pretrained VLM to add wheels to a rover base. The model failed to understand how to properly join wheels to the base assembly, produced wheels without geometric detail (basic cylinders), and generated non-executable code that lacked proper constraints and mate definitions.</figcaption>
+      </figure>
+      
+      <p>This early attempt exposed three critical gaps in the pretrained model's capabilities. First, the model lacked understanding of CAD assembly semantics in that it could not generate proper mate constraints to join wheel components to the base chassis, resulting in floating, disconnected geometry. Second, it produced geometrically unrefined components, such as the simple cylinders rather than detailed wheels with features like treads, hubs, and mounting holes that would be present in the reference image. Third, and most fundamentally, the generated code was non-executable: missing import statements, undefined variables, and incorrect CadQuery API usage prevented the code from running at all without manual intervention.</p>
+      
+      <p>These failures highlighted a fundamental limitation of general-purpose vision-language models: despite impressive zero-shot performance on natural image understanding, they lack the specialized knowledge required for structured, constraint-based parametric modeling. Unlike natural language generation where approximate outputs may be useful, CAD code generation requires <em>exact</em> adherence to API syntax, geometric constraints, and assembly logic. A single missing mate definition or malformed import renders the entire output unusable. This observation directly motivated the creation of a domain-specific training dataset that would teach the model not just what CAD components <em>look like</em>, but how they are <em>constructed</em>, <em>constrained</em>, and <em>assembled</em> in executable code.</p>
+      
+      <p>Thus, the next step after setting up the infrastructure was to curate a CADQuery dataset, augment that data, and fine-tune a VLM. After this point, the workflow can be re-evaluated. 
+        
+        After fine-tuning on the curated CAD dataset (detailed in the following sections), the system gained two critical capabilities that the pretrained model lacked: (1) generating properly constrained, detailed CAD components with correct assembly logic, mates, and geometric features, and (2) comparing reference images to current model states to provide actionable, parameter-specific recommendations. The image below demonstrates the recommendation capability, which demonstrates the model beginning to understand discrepancy between the current CAD and the reference image:</p>
+      
+      <figure>
+        <img src="assets/recommendation.png" alt="Fine-tuned VLM providing recommendations" />
+        <figcaption>Figure 3. <em>Post-Fine-Tuning Recommendation Capability:</em> The fine-tuned VLM successfully compares a reference image (showing desired 3-wheel configuration) against the current CAD model state and provides specific, actionable recommendations.</figcaption>
+      </figure>
+      
+      <p>Crucially, the recommendations are actionable in that they specify exact parameters to modify (e.g., <code>wheels_per_side</code>) and the quantitative changes necessary.</p>
+      
+      <p>This capability transforms the VLM from a code generator into a <em>design assistant</em> that can guide iterative refinement. Rather than requiring users to manually inspect renders and determine which parameters to adjust, the system automatically detects misalignment and proposes corrections. This closed-loop feedback mechanism where the model reasons about visual discrepancies and suggests parametric fixes was less present in the pretrained model and emerged after exposure to examples pairing visual differences with corresponding code changes. The development of this capability directly informed the dataset design strategy described next, emphasizing the importance of before/after image pairs and explicit instruction-to-parameter mappings.</p>
+
+      <h2 id="dataset">7 Dataset Design & Creation</h2>
+      <p>To address the limitations identified in the above sections, I curated a domain-specific dataset of ~150 data samples, pairing dual images (before and after states) with natural language instructions and corresponding CadQuery code modifications. The dataset was systematically constructed from assembly examples in the <code>cqparts_bucket</code> repository, covering diverse mechanical components including rovers, Arduino boards, batteries, belts, and various mechanical assemblies.</p>
+      
+      <h4>7.1.0 Dataset Construction</h4>
+      <p>Each sample was created through a structured reverse-engineering process:</p>
+      <ol>
+        <li><strong>Base Assembly Selection:</strong> Start with a complete, functional CadQuery assembly from <code>cqparts_bucket</code> (this becomes the "after" state).</li>
+        <li><strong>Instruction Design:</strong> Select a semantically meaningful edit operation from five categories (detailed below) that makes sense for the assembly type.</li>
+        <li><strong>Before State Generation:</strong> Reverse-engineer the "before" code by undoing the intended modification, ensuring both versions are fully executable and render without errors.</li>
+        <li><strong>Dual Rendering:</strong> Generate isometric views of both states using identical camera parameters (640×480 resolution, consistent pose) to enable direct visual comparison.</li>
+        <li><strong>Structured Annotation:</strong> Package as JSON with <code>before_image</code>, <code>after_image</code>, <code>instruction</code>, <code>before_code</code>, <code>after_code</code>, and <code>category</code> fields.</li>
+      </ol>
+      
+      <h4>7.2.0 Category Distribution and Taxonomy</h4>
+      <p>The dataset spans five edit categories designed to cover the primary modification types in parametric CAD workflows:</p>
+      <ul>
+        <li><strong>Dimension Change (30 samples, 33%):</strong> Parametric adjustments to size, length, width, height, diameter, or other scalar dimensions. Examples: "Increase battery length from 50.5mm to 75.8mm," "Make chassis 20mm wider."</li>
+        <li><strong>Transformation (22 samples, 24%):</strong> Spatial modifications including rotation, translation, or orientation changes. Examples: "Rotate sensor mount 90° on X-axis," "Shift component 15mm along Z-axis."</li>
+        <li><strong>Component Add (16 samples, 17%):</strong> Insertion of new parts or features into an existing assembly. Examples: "Add 2mm chamfer to PCB edges," "Add mounting boss to base plate."</li>
+        <li><strong>Component Swap (16 samples, 17%):</strong> Replacement of one component type with another. Examples: "Replace circular wheel profile with square," "Swap AA battery with Li-ion 18650."</li>
+        <li><strong>Assembly Modification (8 samples, 9%):</strong> Changes to assembly structure, constraints, or mate relationships. Examples: "Mount battery under chassis," "Reposition wheels closer to body."</li>
+        <li><strong>Uncategorized (37 samples):</strong> Additional samples without explicit category labels, providing diversity in assembly types and complexity levels.</li>
+      </ul>
+      
+      <h4>7.3.0 Quality Assurance & Dataset Statistics</h4>
+      <p>Strict quality controls ensure dataset reliability:</p>
+      <ul>
+        <li><strong>Visual Difference Validation:</strong> 95%+ of sample pairs exhibit detectable visual differences (visual diff metric > 5.0), ensuring changes are perceptually meaningful.</li>
+        <li><strong>Code Executability:</strong> 100% of before_code and after_code versions execute without errors and produce valid 3D geometry.</li>
+        <li><strong>Instruction Specificity:</strong> All instructions are actionable and reference specific parameters, quantities, or components (no vague directives like "make it better").</li>
+        <li><strong>Rendering Consistency:</strong> All image pairs use identical camera intrinsics, extrinsics, and resolution (640×480 isometric views) to isolate geometric changes from viewpoint effects.</li>
+        <li><strong>Object Diversity:</strong> Dataset includes mechanical assemblies (rovers, cars, drones), electrical components (Arduino, batteries), mechanical elements (belts, gears, bearings), and structural parts (brackets, mounts, chassis).</li>
+      </ul>
+      
+      <p>The data was split with 70/15/15 for train/validation/test. Transforms such as brightness, contrast, noise were applied to improve robustness. The main limitation is that the dataset is primarily synthetic renders, and future work should incorporate real CAD photographs, more component categories, cluttered backgrounds, and more multi-object assemblies.</p>
+
+      <h4>7.4.0 Dataset Structure</h4>
+      <p>Each training example consists of a dual-image pair (before and after states), a natural language instruction, and the corresponding code modification. Below is a representative sample from the arduino component:</p>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0;">
+        <figure style="margin: 0;">
+          <img src="assets/before_image.png" alt="Before: Arduino PCB without chamfer" style="width: 100%; height: auto; border-radius: 12px; border: 1px dashed var(--border); background: var(--bg-soft);" />
+          <figcaption>Before: Arduino PCB without chamfer</figcaption>
+        </figure>
+        <figure style="margin: 0;">
+          <img src="assets/after_image.png" alt="After: Arduino PCB with 2mm chamfer" style="width: 100%; height: auto; border-radius: 12px; border: 1px dashed var(--border); background: var(--bg-soft);" />
+          <figcaption>After: Arduino PCB with 2mm chamfer</figcaption>
+        </figure>
+      </div>
+
+      <pre><code>{
+        "before_image": "samples/arduino_manual_add_chamfer/before_image.png",
+        "after_image": "samples/arduino_manual_add_chamfer/after_image.png",
+        "instruction": "Add a 2mm chamfer to all edges of the Arduino PCB board",
+        "category": "component_add",
+        "before_code": "\nimport cadquery as cq\nimport cqparts\nfrom cqparts.params import *\nfrom cqparts_bucket.controller import Arduino\n\np = Arduino()\n",
+        "after_code": "\nimport cadquery as cq\nimport cqparts\nfrom cqparts.params import *\n\nclass ArduinoChamfered(cqparts.Part):\n    length = PositiveFloat(68.6)\n    width = PositiveFloat(53.3)\n    thickness = PositiveFloat(1)\n    hole_size = PositiveFloat(3)\n    \n    def mount_points(self, offset=0):\n        wp = cq.Workplane(\"XY\", origin=(-self.length / 2, -self.width / 2, offset))\n        pts = [(14, 2.5), (65.5, 7), (65.5, 35), (15.3, 50.5)]\n        h = wp.moveTo(*pts[0]).polyline(pts[1:]).vertices()\n        return h\n    \n    def make(self):\n        wp = cq.Workplane(\"XY\")\n        board = wp.box(length=self.length, width=self.width, height=self.thickness)\n        holes = (\n            self.mount_points(offset=-self.thickness)\n            .circle(self.hole_size / 2)\n            .extrude(self.thickness * 2)\n        )\n        board = board.cut(holes)\n        board = board.edges(\"|Z\").chamfer(2)  # ADDED CHAMFER\n        return board\n\np = ArduinoChamfered()\n"
+      }</code></pre>
+
+      <h4>Example 2: Component Swap</h4>
+      <p>This example demonstrates a structural modification where the wheel profile is changed from circular to square:</p>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0;">
+        <figure style="margin: 0;">
+          <img src="assets/axle_before.png" alt="Before: Circular wheel profile" style="width: 100%; height: auto; border-radius: 12px; border: 1px dashed var(--border); background: var(--bg-soft);" />
+          <figcaption>Before: Circular wheel profile</figcaption>
+        </figure>
+        <figure style="margin: 0;">
+          <img src="assets/axle_after.png" alt="After: Square wheel profile" style="width: 100%; height: auto; border-radius: 12px; border: 1px dashed var(--border); background: var(--bg-soft);" />
+          <figcaption>After: Square wheel profile</figcaption>
+        </figure>
+      </div>
+
+      <pre><code>{
+        "before_image": "samples/axle_component_swap_0/before_image.png",
+        "after_image": "samples/axle_component_swap_0/after_image.png",
+        "instruction": "Replace the circular profile with a square profile in the Axle",
+        "category": "component_swap",
+        "before_code": "class Wheel(cqparts.Part):\n    ...\n    def make(self):\n        wheel = (\n            cadquery.Workplane(\"XY\")\n            .circle(self.diameter / 2)\n            .extrude(self.width)\n            .chamfer(1)\n        )\n        ...",
+        "after_code": "class Wheel(cqparts.Part):\n    ...\n    def make(self):\n        wheel = (\n            cadquery.Workplane(\"XY\")\n            .rect(self.diameter, self.diameter)\n            .extrude(self.width)\n            .chamfer(1)\n        )\n        ..."
+      }</code></pre>
+      <p class="small" style="color: var(--muted);">Code snippets abbreviated for brevity. Full samples include complete CadQuery class definitions with all parameters and geometric construction logic.</p>
+
+      <h2 id="vlm-selection">8 VLM Selection & Fine‑Tuning</h2>
+      <p>I selected LLaVA‑OneVision (Qwen2‑7B OV) since it was open source/accessible and could run on my compute resources. Other details on selection factors are:</p>
+      <ul>
+        <li>Multimodal architecture with SigLIP vision tower + Qwen2‑7B LLM enabled reasoning over several input images, which was not an inherent property in all VLM's offered on OLLAMA</li>
+        <li>7B fits in 24GB VRAM with 4‑bit loading and LoRA</li>
+        <li>Hugging Face availability eases reproduction since the weights are open source</li>
+        <li>Provided a good reference point in pretraining for visual reasoning so it was a good starting point for representing CAD edits.</li>
+      </ul>
+      <p>Each training sample contained two images per example (before, after) via the model’s chat template (or <code>&lt;image&gt;\n&lt;image&gt;</code> prompt), teaching how the natural language and code-based edits grounded in visual discrepancy.</p>
+      <p>Other models considered were LLaVA‑v1.6 (Mistral‑7B). However, because it underperformed for edit supervision in my first experiment I wanted to identify and experiment with something a little better suited for code, not just normal sentences. Qwen2‑VL is promising but required more engineering for my code only output format.</p>
+      <p>I appled LoRA to attention/MLP blocks of the language model so the vision tower stays frozen. Fine-tuning details are below:</p>
+      <ul>
+        <li>Configuration: LoRA r=4, α=8; LR=1e‑4 with warmup ratio 0.05; 1 epoch; batch size 1 with gradient accumulation 32; fp16 with gradient checkpointing and CPU offload.</li>
+        <li>Training command: <code>python finetune_llava_small.py --jsonl samples/dataset.jsonl --image_root . --output_dir runs/onevision_lora_small --model_name llava-hf/llava-onevision-qwen2-7b-ov-hf --batch_size 1 --grad_accum 32 --lr 1e-4 --epochs 1 --warmup_ratio 0.05 --lora_r 4 --lora_alpha 8 --freeze_vision --fp16 --cpu_offload --gradient_checkpointing</code></li>
+      </ul>
+
+      <h2 id="system">9 System Architecture & Implementation</h2>
+      <p>The first layer of response to the human input are basic rules. Deterministic extraction for counts and arithmetic (
+        e.g., “diameter 15mm smaller”) are valuable because not everything needs to be put through an ML model if it can be addressed in a simple tweak. An example of the rule implementation can be seen below:</p>
+      <pre><code># "diameter 15mm smaller" → decrement with floor
+m = re.search(r"diameter.*?(\d+)\s*mm\s+smaller", text)
+if m:
+    new_val = max(10, current_diameter - int(m.group(1)))
+    apply_change('diameter', new_val)</code></pre>
+      <p>The second layer is where the VLM performs complex edits. When rules don’t match, the VLM generates fenced <code>python</code> code deltas conditioned on both images + text. A normalization layer restores imports, fixes syntax, and checks simple constraints (e.g., non‑overlapping wheel spacing. This part was hard coded for the specific example, but with more time could be extended to include the domain relevant simulation checks as a verification step).</p>
+      <p>After the second layer, the CadQuery model is rebuilt, exported as a GLB via Trimesh, and streamed to a Three.js viewer. Due to environment issues and package version, VLM inference (PyTorch 2.x) and legacy <code>cqparts</code> builds run in separate Conda envs connected via subprocess IPC.</p>
+
+      <h4 id="prompt-design">9.1.0 VLM Prompt Design & System Instructions</h4>
+      <p>The prompting took many iterations to ensure the VLM emitted safe, minimal, and executable edits for a live parametric assembly. I found that moving reliability work into the prompt contract and post-processing guardrails reduced syntax errors and out-of-scope actions without sacrificing edit quality.</p>
+      
+      <h4>The JSON-Edits System Prompt (Policy Layer)</h4>
+      <p>I employ a strict output contract (the <code>VLM_SYSTEM_PROMPT</code>) to transform multimodal intent into a compact JSON array of edit objects. Design choices:</p>
+      <ul>
+        <li>Pure JSON + summary footer. Enforces machine-parsable output; any deviation is rejected and retried.</li>
+        <li>Whitelist schema & ranges. Keys (<code>target_component</code>, <code>action</code>, <code>parameters</code>, etc.) and per-component parameter ranges prevent illegal actions (e.g., unknown parts, negative diameters).</li>
+        <li>Conservative edits. The instruction "smallest set of conservative changes" curbs cascading modifications and reduces failure surface.</li>
+        <li>Change budget (≤5). Limits shotgun proposals; improves debuggability.</li>
+        <li>Self-check checklist. A final, model-visible gate nudges adherence; if any check fails, the model must emit <code>[]</code> + <code>SUMMARY</code> (a safe no-op).</li>
+      </ul>
+      <p>This prompt acts as a typed interface between perception and CAD: it channels free-form language/vision into a symbolic, validated delta that my executor can map to CadQuery while preserving model integrity.</p>
+
+      <h4>The Code-Generation Prompt (Execution Layer)</h4>
+      <p>When a full smyce edit is unavoidable (e.g., batch parameter changes), I switch to <code>VLM_CODEGEN_PROMPT</code>, which:</p>
+      <ul>
+        <li>Forbids prose/markdown and starts with a shebang, minimizing non-code tokens.</li>
+        <li>Demands exact baseline copy and value-only changes (<code>PositiveFloat(...)</code>), preventing structural drift.</li>
+        <li>Search-replace protocol and exact-line matching avoid accidental multi-site edits and ensure diffs are traceable.</li>
+        <li>Arithmetic rules bind phrases ("15 mm smaller") to correct deltas using baseline values, not an arbitrary state</li>
+      </ul>
+      <p>CadQuery assemblies are brittle under structural edits, so enforcing value-only modifications preserves construction graphs and constraints. This is a key difference between the VLM and a general purpose language model like GPT-4o.</p>
+      
+      <p>The post-processing layer includes the following steps:</p>
+      <ul>
+        <li>Validator enforcing the JSON schema + param ranges + key whitelist specified in the prompt, unknown keys or OOB values are rejected.</li>
+        <li>Normalizer strips unnecessary units, restores imports, and formats code.</li>
+        <li>Lightweight checks (e.g., wheel overlap, min wall thickness) reject unsafe deltas before a rebuild</li>
+        <li>If the contract is violated or the build fails, the orchestrator supplies minimal error traces back to the VLM (not full logs) to elicit a corrected reattempt to the request.</li>
+        <li>Human-in-the-loop is enabled via the UI displays, which display the proposed deltas and diffs for acceptance, enabling human oversight.</li>
+      </ul>
+      
+      <h4>9.2.0 Lessons Learned</h4>
+      <ul>
+        <li>The VLM prompt contract always outperforms verbose instructions. Short, rigid schemas with explicit "DISALLOWED" sections were much better than long discursive prompts.</li>
+        <li>Conditioning on both the reference image and current state of the CAD model reduced edits by grounding the edit task, not generation.</li>
+        <li>Rule-first routing (counts/arithmetic) offloads brittle math from the VLM, lowering syntax and logic errors and allowing the VLM to focus on structural semantics.</li>
+        <li>Emphasizing small, compositional edits makes failures easy to localize and enhanced accuracy of the fine-tuned VLM.</li>
+      </ul>
+    </section>
+
+    <section id="experiments">
+      <h2>10. Experiments & Results</h2>
+      <h4>10.1.0 Setup and Evaluation Approach</h4>
+      <p>I evaluate the system through qualitative analysis of generated code and visual outputs. Tasks span wheel count modifications, diameter adjustments, spacing changes, and structural additions on a rover base model. The evaluation focuses on the system's ability to generate semantically correct parameter modifications and executable CadQuery code.</p>
+      <p>My evaluation examines the system's performance through several dimensions: semantic accuracy (correct parameter identification and modification), visual alignment (correspondence between generated code and visual intent), geometric consistency (maintenance of valid geometric relationships), and execution success (successful CadQuery code generation and model building).</p>
+
+      <h4>10.2.0 BLUF (Bottom Line Up Front)</h4>
+      <p>Through systematic testing of various modification tasks, I observe that the system demonstrates strong semantic understanding of CAD parameter relationships. The hybrid approach effectively combines rule-based parameter extraction for simple arithmetic operations with VLM-based reasoning for complex structural changes. Key observations include:</p>
+      <ul>
+        <li>Parameter identification: The system correctly identifies relevant parameters (e.g., <code>wheels_per_side</code>, <code>diameter</code>, <code>axle_spacing_mm</code>) from natural language instructions.</li>
+        <li>Code generation: Generated CadQuery code maintains proper syntax and follows established patterns, though occasional syntax errors persist.</li>
+        <li>Visual correspondence: Parameter modifications generally produce the expected visual changes in the 3D model, demonstrating effective translation from intent to geometry.</li>
+        <li>Constraint handling: The system shows awareness of geometric constraints, such as preventing wheel overlap when adjusting spacing.</li>
+      </ul>
+      
+      <h4>10.3.0 Reference Image Context</h4>
+      <figure>
+        <img src="assets/reference_image.png" style="width: 100%; height: auto;" alt="Reference image showing 4-wheel rover configuration" />
+        <figcaption>Fig 3a. <em>Reference Image:</em> This image serves as the target configuration that the VLM system aims to achieve. It shows a 4-wheel rover setup that users can reference when making modifications to their CAD models. The system uses this reference to understand the desired end state when processing natural language instructions.</figcaption>
+      </figure>
+      
+      <h4>10.3.1 Wheel Count Modifications</h4>
+      <figure>
+        <img src="assets/remove_all_wheels_before.png" style="width: 100%; height: auto;" alt="Remove all wheels - before state" />
+        <figcaption>Fig 3b. <em>Before:</em> Rover with too many wheels (four per side) as shown in the 3D viewport. The VLM prompt "remove all wheels" is visible in the interface.</figcaption>
+      </figure>
+      <figure>
+        <img src="assets/remove_all_wheels_after.png" style="width: 100%; height: auto;" alt="Remove all wheels - after state" />
+        <figcaption>Fig 3c. <em>After:</em> The highlighted code shows <code>wheels_per_side = PositiveFloat(0)</code>, successfully removing all wheels from the rover assembly.</figcaption>
+      </figure>
+
+      <figure>
+        <img src="assets/add_3_wheels_before.png" style="width: 100%; height: auto;" alt="Add 3 wheels per side - before state" />
+        <figcaption>Fig 3d. <em>Before:</em> Rover base without wheels. The VLM prompt "add 3 wheels on each side like in the reference image" is displayed in the interface.</figcaption>
+      </figure>
+      <figure>
+        <img src="assets/add_3_wheels_after.png" style="width: 100%; height: auto;" alt="Add 3 wheels per side - after state" />
+        <figcaption>Fig 3e. <em>After:</em> The highlighted code shows <code>wheels_per_side = PositiveFloat(3)</code>, successfully adding three wheels per side to the rover. The 3D model now displays six wheels total. The spacing and dimensionality, unspecified by the prompt, were not automatically handled by the system.</figcaption>
+      </figure>
+
+      <h4>10.3.2 Wheel Spacing Adjustments</h4>
+      <figure>
+        <img src="assets/axle_spacing_before.png" style="width: 100%; height: auto;" alt="Increase axle spacing - before state" />
+        <figcaption>Fig 3f. <em>Before:</em> Rover with wheels positioned relatively close to the main body. The VLM prompt "increase the spacing between the wheels" is shown in the interface.</figcaption>
+      </figure>
+      <figure>
+        <img src="assets/axle_spacing_after.png" style="width: 100%; height: auto;" alt="Increase axle spacing - after state" />
+        <figcaption>Fig 3g. <em>After:</em> The highlighted code shows <code>axle_spacing_mm = PositiveFloat(90)</code>, demonstrating the increased spacing between wheel axles. The 3D model does not visually confirm the wheels are now spaced further apart along the rover's length. This will be discussed in the challenges section</figcaption>
+      </figure>
+
+      <h4>10.3.3 Handling Multiple Instructions in a Single Prompt</h4>
+      <p>The system demonstrates the ability to process and apply multiple parametric modifications from a single natural language prompt, reducing the need for iterative back-and-forth interactions.</p>
+      <figure>
+        <img src="assets/big_diameter.png" style="width: 100%; height: auto;" alt="Multiple parameter modifications applied simultaneously" />
+        <figcaption>Fig 3h. <em>Multi-Parameter Edit:</em> Response to the compound instruction "increase the wheel diameter and adjust the spacing between wheels." The system successfully identified and modified multiple parameters: <code>diameter = PositiveFloat(70.0)</code> (increased from 55.0) and spacing adjustments. This demonstrates the VLM's capability to decompose complex instructions into discrete parameter changes and apply them simultaneously, streamlining the design iteration process.</figcaption>
+      </figure>
+      <figure>
+        <img src="assets/shrink_diameter_after.png" style="width: 100%; height: auto;" alt="Syntax error despite correct semantic understanding" />
+        <figcaption>Fig 3i. <em>Syntax Error Despite Semantic Correctness:</em> The highlighted code shows <code>diameter = PositiveFloat(40.0)</code> (reduced from 55.0), correctly implementing the 15mm diameter reduction. However, the console displays "Model rebuild failed - check console for errors," demonstrating a key challenge: syntax errors can prevent successful model rendering even when the parameter modifications are semantically correct. This example illustrates the gap between correct semantic understanding and robust code generation that the system must address.</figcaption>
+      </figure>
+
+      <h4>10.4.0 Failure Cases & System Limitations</h4>
+      <p>As demonstrated in Figure 3i, the system faces several persistent challenges that limit its reliability. Syntax errors (unclosed brackets, malformed imports, incorrect indentation) can prevent successful model rendering even when the semantic understanding and parameter modifications are correct. Hallucinated classes and arithmetic slips also persist despite the normalization layer. While my hybrid approach corrects most common issues, the gap between semantic correctness and syntactically valid code generation remains a key limitation that must be addressed for production deployment.</p>
+    </section>
+
+    <section id="discussion">
+      <h2>11 Discussion</h2>
+      <p>Routing frequent arithmetic edits to rules (selecting when to automate and when to lean towards an "agentic" approach) removes stochasticity and syntax risk, letting the VLM focus on structural reasoning. </p>
+      <p>Conditioning on two images enables edit reasoning where the model aligns discrepancies between reference and current states, then maps them to code deltas. Fine-tuning the VLM made a significant difference in the quality of the edits and parity between the reference image and current CAD state, but the system still faces challenges with syntax errors and hallucinated classes.</p>
+      <p>This work lowers the barrier to CAD literacy, accelerating design iteration for students, hobbyists, and small labs. Potential to shorten concept‑to‑prototype cycles in assistive devices, robotics, and field repair.</p>
+
+       <h4>11.1.0 Current limitations</h4>
+       <ul>
+         <li><strong>mathematical reasoning & engineering functions:</strong> when the VLM attempts to perform mathematical calculations instead of leveraging existing engineering functions, it can produce incorrect results. The model sometimes generates arithmetic operations that don't align with established CAD parameter relationships. Future work should introduce callable utility functions and tool-use capabilities to avoid free-form arithmetic and ensure mathematical accuracy.</li>
+         
+         <li><strong>constraint definition & assembly complexity:</strong> parametric models require proper constraint definitions to maintain geometric validity. Current limitations include improperly defined constraints leading to issues like wheel stacking, as evidenced in examples where four wheels appear incorrectly positioned. Future expansions should involve leveraging information on context and operational scenarios to aid in constraint writing. The VLM should be trained on more examples of complex assemblies to develop better understanding of constraint implementation, particularly for multi-component systems with interdependent geometric relationships.</li>
+         
+         <li><strong>syntax errors & code generation robustness:</strong> despite the normalization and validation functions, the VLM sometimes generates syntax errors that prevent successful re-rendering. Manual inspection reveals that the semantic content and parameter modifications are often correct and aligned with user instructions, but syntax issues prevent execution. More extensive training on CadQuery library API and functionality will help decrease the recurrence of these errors as the model learns proper code structure and syntax patterns.</li>
+         
+         <li><strong>computational resources & model scale:</strong> time and GPU utilization constraints limited this work to the smallest available model with minimal fine-tuning. The system experienced frequent CUDA out-of-memory errors even with the existing limitations. With more time and resources, training on a larger dataset with increased model parameter size would significantly improve robustness and reliability. Future work should explore 13B–30B backbones with distributed LoRA and QLoRA for efficiency.</li>
+         
+         <li><strong>hallucination & validation gaps:</strong> the VLM occasionally hallucinates unnecessary classes and components that don't exist in the target assembly. While validation code was introduced to catch these issues, it doesn't always identify all hallucinated elements. This highlights the need for more robust validation mechanisms and training on diverse assembly types to reduce hallucination frequency.</li>
+         
+         <li><strong>bias & misuse considerations:</strong> synthetic renders underrepresent real-world clutter and materials, potentially limiting the system's ability to handle diverse, real-world CAD scenarios. Deployed systems should include human-in-the-loop review and maintain provenance of edits. Additionally, the system's reliance on synthetic training data may introduce biases that don't reflect the full spectrum of engineering design practices and constraints encountered in professional environments.</li>
+       </ul>
+       
+       <h4>11.2.0 Future directions</h4>
+       <p>Key areas for improvement include: (1) expanding to 10k+ examples with parallel rendering, (2) incorporating depth/LiDAR and simulation traces for richer multimodal understanding, (3) pursuing closed-loop optimization with differentiable renderers or physics solvers, (4) opening to a "google docs" style interface where multiple users can provide reinforcement and instructions at once, and (5) developing constrained decoding over code grammars to ensure syntactic validity.</p>
+    
+    </section>
+
+    <section id="conclusion">
+      <h2>12 Conclusion</h2>
+      <p>This work demonstrates how a vision-language model can turn visual intent into precise CAD updates. Instead of rebuilding models from scratch, it compares a target image with the current design and automatically adjusts only the necessary parameters, producing executable CadQuery edits. Compared with prior systems like Query2CAD, CADCodeVerify, CadVLM, and CAD-Coder, which focus on generating or verifying entire CAD programs, this approach streamlines design refinement by preserving existing geometry and constraints. The result is a faster, more reliable, and more accessible workflow that reduces manual tuning and allows both experts and non-experts to improve designs through natural visual feedback. The objective and future vision of this work would be to target high-fidelity CAD modeling and simulation requirements that are used in operational environments beyond that of other 3D design (i.e. using this for modeling aircraft as opposed to modeling for a video game).</p>
+      <p>Through qualitative evaluation, I demonstrate the system's capability to generate semantically correct parameter modifications and executable CadQuery code. While challenges remain in syntax robustness and constraint handling, the approach shows promise for bridging the gap between natural language intent and parametric CAD modeling. With expanded datasets and improved constraint‑aware decoding, VLM‑assisted CAD can mature from prototype to production tool, fundamentally changing how parametric CAD modeling is approached in the era of multimodal AI.</p>
+    </section>
+
+
+    <section id="refs">
+      <h2>References</h2>
+      <ol>
+        <li>Li, Junnan; Li, Dongxu; Savarese, Silvio; Hoi, Steven. BLIP-2: Bootstrapping Language-Image Pre-training with Frozen Image Encoders and Large Language Models. Proceedings of Machine Learning Research, Vol. 202, pp. 20351–20383 (ICML 2023). Proceedings of Machine Learning Research; arXiv.</li> 
+        <li>Badagabettu, Akshay; Yarlagadda, Sai Sravan; Farimani, Amir Barati. Query2CAD: Generating CAD Models Using Natural Language Queries. arXiv preprint arXiv:2406.00144, 2024. arXiv.</li> 
+        <li>Alrashedy, Kamel; Tambwekar, Pradyumna; Zaidi, Zulfiqar; Langwasser, Megan; Xu, Wei; Gombolay, Matthew. Generating CAD Code with Vision-Language Models for 3D Designs (introducing CADCodeVerify). arXiv preprint arXiv:2410.05340, 2024; also published in ICLR 2025. arXiv; ICLR Proceedings.</li> 
+        <li>Wu, Sifan; Chen, Chang; [others]. CadVLM: Bridging Language and Vision in the Generation of Parametric CAD Sketches. In ECCV 2024, Lecture Notes in Computer Science. ECVA; ResearchGate.</li> 
+        <li>Doris, Anna C.; Alam, Md Ferdous; Heyrani Nobari, Amin; Ahmed, Faez. CAD-Coder: An Open-Source Vision-Language Model for Computer-Aided Design Code Generation. arXiv preprint arXiv:2505.14646, 2025.</li>
+      </ol>
+    </section>
+
+    <footer>
+      <p>2025 VLM CAD Project Ghanem</p>
+    </footer>
+  </div>
+</body>
+</html>
+
